@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.ObjectPool;
+using Microsoft.Extensions.ObjectPool;
 
 namespace ObjectPoolResuseCases;
 
@@ -60,19 +60,6 @@ internal static class Program
     [STAThread]
     private static void Main()
     {
-        /*After experimenting similar resetting mechanism in my code, i found it a big performance disaster to reset every instance,
-        especially if a Type owns too many properties, and  if most of its properties r to be overwritten later.
-        now i removed all resetting implementations and adopted a performance friendly solution:
-        use different dedicated DefaultObjectPools for different object-reuse case(per object life-cycle) of the same type, so that the same group of properties r always overwritten exactly in reusing code(i.e.avoid messing up reuse-cases), thus to avoid resetting.and wherein u don't have to use Reset() nor custom ObjectPoolPolicy while assuring best performance.
-        The only problem here is how to manage different reuse-cases, better with code, as to make it more readable and managable.
-        i have contemplated some solutions :
-        1) defined compulsory evaluation to predefined upon callling a new Return<T>(Func<T, T>) by using Component Interfaces.
-        Class MyObject : IPropertyGroup4ReuseCase1, IPropertyGroup4ReuseCase2 {}
-
-        var a = Case1ObjectPool.Return<IPropertyGroup4ReuseCase1>(obj => { obj.Property1 = newValue1; obj.Property2 = newValue2; })
-
-        2) i would also expect some analyzer/compiler help, a simple warning, if reuse-case consistency is violated,
-        */
         int counter = 0;
         ConsoleKeyInfo key = default;
 
