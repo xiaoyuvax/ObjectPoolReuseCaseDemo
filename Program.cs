@@ -45,7 +45,9 @@ internal static class Program
     /// <param name="case1"></param>
     /// <param name="eval">Delegate to evaluate underlying properties immediately, if u don't want to do it immediately, u can simply use Get<I>() on the ObjectPool</param>
     /// <returns></returns>
-    public static T Get<T, I>(this DefaultObjectPool<I> case1, Func<I, I> eval = null) where I : class
+    public static T Get<T, I>(this DefaultObjectPool<I> case1, Func<I, I> eval = null)
+        where T : I
+        where I : class
     {
         I objI = case1.Get();
         objI = eval?.Invoke(objI) ?? objI;   //note: if the delegate returns null, objI would not be changed.
