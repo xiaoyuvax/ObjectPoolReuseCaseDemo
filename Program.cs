@@ -1,4 +1,4 @@
-using Microsoft.Extensions.ObjectPool;
+﻿using Microsoft.Extensions.ObjectPool;
 
 namespace ObjectPoolResuseCases;
 
@@ -14,7 +14,12 @@ public interface IReuseCase2
     public string Property4 { get; set; }
 };
 
-public class DefaultObjectPoolPolicy4ReuseCases<T, I> : IPooledObjectPolicy<I>
+/// <summary>
+/// Default PooledObjectPolicy for ReuseCase paradigm
+/// </summary>
+/// <typeparam name="T">The implementing type to be reused</typeparam>
+/// <typeparam name="I">The Component Interface to associate with corresponding ObjectPool</typeparam>
+public class DefaultReuseCasePolicy<T, I> : IPooledObjectPolicy<I>
     where T : class, I, new()
     where I : class
 {
@@ -33,23 +38,23 @@ public class MyObject : IReuseCase1, IReuseCase2
 
 internal static class Program
 {
-    private static readonly DefaultObjectPool<IReuseCase1> ObjectPoolCase1 = new(new DefaultObjectPoolPolicy4ReuseCases<MyObject, IReuseCase1>());
+    private static readonly DefaultObjectPool<IReuseCase1> ObjectPoolCase1 = new(new DefaultReuseCasePolicy<MyObject, IReuseCase1>());
 
-    private static readonly DefaultObjectPool<IReuseCase2> ObjectPoolCase2 = new(new DefaultObjectPoolPolicy4ReuseCases<MyObject, IReuseCase2>());
+    private static readonly DefaultObjectPool<IReuseCase2> ObjectPoolCase2 = new(new DefaultReuseCasePolicy<MyObject, IReuseCase2>());
 
     /// <summary>
-    /// This is the method suggest to be added or just extended to DefaultObjectPool
+    /// This method's suggested to be added or just extended to DefaultObjectPool
     /// </summary>
     /// <typeparam name="T">The type which may has multiple Reusecase</typeparam>
-    /// <typeparam name="I">The component interface for T</typeparam>
-    /// <param name="case1"></param>
-    /// <param name="eval">Delegate to evaluate underlying properties immediately, if u don't want to do it immediately, u can simply use Get<I>() on the ObjectPool</param>
+    /// <typeparam name="I">The Component Interface for T</typeparam>
+    /// <param name="pool"></param>
+    /// <param name="eval">Delegate to evaluate underlying properties immediately, as can be codedly equivalent to a partial Reset(). If u don't want to do it immediately, u can simply use Get<I>() on the pool</param>
     /// <returns></returns>
-    public static T Get<T, I>(this DefaultObjectPool<I> case1, Func<I, I> eval = null)
+    public static T Get<T, I>(this DefaultObjectPool<I> pool, Func<I, I> eval = null)
         where T : I
         where I : class
     {
-        I objI = case1.Get();
+        I objI = pool.Get();
         objI = eval?.Invoke(objI) ?? objI;   //note: if the delegate returns null, objI would not be changed.
         return objI is T objT ? objT : default;
     }
@@ -69,7 +74,7 @@ internal static class Program
             Console.WriteLine("Property3=" + (obj.Property3 ?? "null") + "\t" + "Property4=" + (obj.Property4 ?? "null"));
         }
 
-        while (!"qQ".Contains(key.KeyChar))
+        while (true)
         {
             Console.WriteLine("[Reuse Case I: case1Obj]");
             Console.WriteLine("<-Object Got from ObjectPoolCase1!");
@@ -97,7 +102,7 @@ internal static class Program
             ObjectPoolCase2.Return(objCase2);
             Console.WriteLine("->ObjCase2 Returned!\r\n");
 
-            Console.WriteLine("-----------------Press Q or q to quit, Press any other key to Reuse Once, -------------------\r\n");
+            Console.WriteLine("----------------- Press any other key to Reuse Once, -------------------\r\n");
             var k = Console.ReadKey().Key;
 
             counter++;
