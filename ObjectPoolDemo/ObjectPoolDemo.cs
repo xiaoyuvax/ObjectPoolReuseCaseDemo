@@ -1,4 +1,5 @@
 using Microsoft.Extensions.ObjectPool;
+using System;
 using Wima.Log;
 
 namespace ObjectPoolResuseCases;
@@ -72,7 +73,6 @@ internal static class ObjectPoolDemo
     {
         log.LogModes = LogMode.Console;
         int counter = 0;
-        ConsoleKeyInfo key = default;
 
         static void showProperties(MyObject obj)
         {
