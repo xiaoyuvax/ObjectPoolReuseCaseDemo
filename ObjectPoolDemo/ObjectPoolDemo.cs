@@ -39,7 +39,7 @@ public class MyObject : IReuseCase1, IReuseCase2
 
 internal static class ObjectPoolDemo
 {
-    private static WimaLogger log = new("ObjectPoolDemo");
+    private static WimaLogger log = new("ObjectPoolReuseCaseDemo");
 
     private static readonly DefaultObjectPool<IReuseCase1> ObjectPoolCase1 = new(new DefaultReuseCasePolicy<MyObject, IReuseCase1>());
 
