@@ -1,5 +1,6 @@
 using Microsoft.Extensions.ObjectPool;
 using System;
+using System.IO;
 using Wima.Log;
 
 namespace ObjectPoolResuseCases;
@@ -22,7 +23,7 @@ public interface IReuseCase2
 /// <typeparam name="T">The implementing type to be reused</typeparam>
 /// <typeparam name="I">The Component Interface to associate with corresponding ObjectPool</typeparam>
 public class DefaultReuseCasePolicy<T, I> : IPooledObjectPolicy<I>
-    where T : class, I, new()
+    where T : I, new()
     where I : class
 {
     public I Create() => new T();
@@ -98,7 +99,7 @@ internal static class ObjectPoolDemo
             log.Info("[Reuse Case II: case2Obj]");
             log.Info("<-Object Got from ObjectPoolCase2!");
             var objCase2 = ObjectPoolCase2.Get<MyObject, IReuseCase2>(t =>
-            {
+            {                
                 t.Property3 = $"C{counter}";
                 t.Property4 = $"D{counter}";
                 return t;
