@@ -1,11 +1,12 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33403.182
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ObjectPoolDemo", ".\ObjectPoolDemo\ObjectPoolDemo.csproj", "{C86DE3BC-1C56-4BDD-9D28-2B121F6BE365}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ObjectPoolDemo", "ObjectPoolDemo\ObjectPoolDemo.csproj", "{C86DE3BC-1C56-4BDD-9D28-2B121F6BE365}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wima.Log", ".\WMLogService.Core\Wima.Log.csproj", "{FF6B43DD-4F3B-483B-933E-89FA76785731}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wima.Log", "WMLogService.Core\Wima.Log.csproj", "{FF6B43DD-4F3B-483B-933E-89FA76785731}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedProject", "SharedProject\SharedProject.shproj", "{A82B1482-0732-4AA7-ABAD-FF13D2638117}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,5 +28,9 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D532C0FC-382C-4718-B1D9-9470A78AE2D9}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		SharedProject\SharedProject.projitems*{a82b1482-0732-4aa7-abad-ff13d2638117}*SharedItemsImports = 13
+		SharedProject\SharedProject.projitems*{c86de3bc-1c56-4bdd-9d28-2b121f6be365}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
