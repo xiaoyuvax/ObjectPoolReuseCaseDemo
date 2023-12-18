@@ -1,6 +1,8 @@
 using Microsoft.Extensions.ObjectPool;
 using System;
-using System.IO;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using Wima.Log;
 
 namespace ObjectPoolResuseCases;
@@ -77,42 +79,74 @@ internal static class ObjectPoolDemo
 
         static void showProperties(MyObject obj)
         {
-            log.Info("Property1=" + (obj.Property1 ?? "null") + "\t" + "Property2=" + (obj.Property2 ?? "null"));
-            log.Info("Property3=" + (obj.Property3 ?? "null") + "\t" + "Property4=" + (obj.Property4 ?? "null"));
+            log?.Info("Property1=" + (obj.Property1 ?? "null") + "\t" + "Property2=" + (obj.Property2 ?? "null"));
+            log?.Info("Property3=" + (obj.Property3 ?? "null") + "\t" + "Property4=" + (obj.Property4 ?? "null"));
         }
 
+        //log = null;  //disable Log by setting it to null,the program can run without problem.
+
+        Console.WriteLine("Loop started!");
         while (true)
         {
-            log.Info("[Reuse Case I: case1Obj]");
-            log.Info("<-Object Got from ObjectPoolCase1!");
-            var objCase1 = ObjectPoolCase1.Get<MyObject, IReuseCase1>(t =>
+            //Suspected Issue:
+            //  In case of multi-threads, ObjectPool.Get() seems not thread-safe under net8 and throws exception, but not under net7
+            //Symptom:
+            //  ObjectPool.Get() in the log object's WriteInternal() method, which uses a DefaultObjectPool<StringBuilder>, throws exception.
+            //  While the ObjectPoolCase1 and ObjectPoolCase2 in Main() seems not causing this problem.
+            Task.Run(() =>
             {
-                t.Property1 = $"A{counter}";
-                t.Property2 = $"B{counter}";
+                log?.Info("[Reuse Case I: case1Obj]");
+                log?.Info("<-Object Got from ObjectPoolCase1!");
+                try
+                {
+                    var objCase1 = ObjectPoolCase1.Get<MyObject, IReuseCase1>(t =>
+                    {
+                        t.Property1 = $"A{counter}";
+                        t.Property2 = $"B{counter}";
 
-                return t;
+                        return t;
+                    });
+
+                    showProperties(objCase1);
+                    ObjectPoolCase1.Return(objCase1);
+                    log?.Info("->ObjCase1 Returned!\r\n");
+
+                    log?.Info("[Reuse Case II: case2Obj]");
+                    log?.Info("<-Object Got from ObjectPoolCase2!");
+                    var objCase2 = ObjectPoolCase2.Get<MyObject, IReuseCase2>(t =>
+                    {
+                        t.Property3 = $"C{counter}";
+                        t.Property4 = $"D{counter}";
+                        return t;
+                    });
+                    showProperties(objCase2);
+
+                    ObjectPoolCase2.Return(objCase2);
+                    log?.Info("->ObjCase2 Returned!\r\n");
+
+                    var objCase3 = ObjectPoolCase1.Get<MyObject, IReuseCase1>(t =>
+                    {
+                        t.Property1 = $"E{counter}";
+                        t.Property2 = $"F{counter}";
+
+                        return t;
+                    });
+                    showProperties(objCase3);
+
+                    //log.Info("----------------- Press any other key to Reuse Once, -------------------\r\n");
+                    //var k = Console.ReadKey().Key;
+                    log?.Info(".");
+
+                    counter++;
+                }
+                catch (Exception ex)
+                {
+                    Debugger.Break();
+                }
             });
-            showProperties(objCase1);
-            ObjectPoolCase1.Return(objCase1);
-            log.Info("->ObjCase1 Returned!\r\n");
 
-            log.Info("[Reuse Case II: case2Obj]");
-            log.Info("<-Object Got from ObjectPoolCase2!");
-            var objCase2 = ObjectPoolCase2.Get<MyObject, IReuseCase2>(t =>
-            {                
-                t.Property3 = $"C{counter}";
-                t.Property4 = $"D{counter}";
-                return t;
-            });
-            showProperties(objCase2);
-
-            ObjectPoolCase2.Return(objCase2);
-            log.Info("->ObjCase2 Returned!\r\n");
-
-            log.Info("----------------- Press any other key to Reuse Once, -------------------\r\n");
-            var k = Console.ReadKey().Key;
-
-            counter++;
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write("Looping:" + (counter % 4) switch { 0 => "-", 1 => @"\", 2 => "|", _ => "/" });
         }
     }
 }
